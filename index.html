@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÇağfenCraft: Ultra Modern (Yerel Mod)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00f3ff;
+            --secondary: #ff003c;
+            --glass: rgba(10, 15, 30, 0.7);
+            --border: rgba(0, 243, 255, 0.4);
+        }
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #050510; font-family: 'Rajdhani', sans-serif; user-select: none; color: white; }
+        
+        /* Arka Plan Efektleri */
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(90px); z-index: 0; opacity: 0.6; animation: breathe 6s infinite alternate; pointer-events: none;}
+        .blob-1 { width: 40vw; height: 40vw; background: #002244; top: -5vw; left: -5vw; }
+        .blob-2 { width: 30vw; height: 30vw; background: #33001b; bottom: -5vw; right: -5vw; }
+        @keyframes breathe { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+        /* Giriş Paneli */
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); transition: 1s ease-in-out; }
+        .glass-panel { background: var(--glass); padding: 40px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 0 30px rgba(0,243,255,0.2), inset 0 0 15px rgba(0,243,255,0.1); text-align: center; z-index: 101; }
+        .glass-panel h2 { font-family: 'Orbitron', sans-serif; font-size: 36px; margin: 0 0 10px 0; color: #fff; text-shadow: 0 0 10px var(--primary); }
+        .glass-panel p { color: #88ccff; font-size: 20px; margin-bottom: 25px; }
+        .glass-panel input { width: 85%; padding: 12px; font-size: 20px; font-family: 'Rajdhani', sans-serif; font-weight: bold; background: rgba(0,0,0,0.6); border: 2px solid var(--border); color: #fff; border-radius: 8px; text-align: center; margin-bottom: 20px; outline: none; transition: 0.3s; }
+        .glass-panel input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,243,255,0.6); }
+        .glass-panel button { padding: 12px 35px; font-size: 22px; font-family: 'Orbitron', sans-serif; font-weight: bold; color: #050510; background: linear-gradient(45deg, var(--primary), #00a2ff); border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; box-shadow: 0 0 15px rgba(0,243,255,0.5); }
+        .glass-panel button:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,243,255,0.8); }
+
+        /* Oyun İçi Arayüz */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; opacity: 0; transition: opacity 1s; }
+        
+        .top-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 75%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); }
+        .stat { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: bold; }
+        .stat span { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        
+        .progress-container { width: 40%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), #00ff88); box-shadow: 0 0 10px var(--primary); transition: width 0.3s; }
+
+        #leaderboard { position: absolute; top: 80px; right: 20px; background: rgba(10, 15, 30, 0.8); padding: 15px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 5px 20px rgba(0,0,0,0.5); min-width: 250px; }
+        #leaderboard h3 { margin: 0 0 10px 0; font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+        #lb-list { list-style: none; padding: 0; margin: 0; font-size: 16px; }
+        #lb-list li { margin-bottom: 8px; display: flex; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;}
+
+        .question-container { position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%); width: 65%; text-align: center; }
+        #question-box { background: rgba(5, 10, 20, 0.85); padding: 25px 35px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); font-size: 28px; font-weight: bold; box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,243,255,0.2); backdrop-filter: blur(10px); }
+        .answers-hint { margin-top: 15px; font-size: 20px; font-family: 'Orbitron', sans-serif; display: flex; justify-content: center; gap: 40px; font-weight: bold; }
+        .ans-red { color: var(--secondary); text-shadow: 0 0 10px var(--secondary); }
+        .ans-blue { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+        /* Hata Efektleri */
+        @keyframes shake { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-5px,5px)} 40%{transform:translate(5px,-5px)} 60%{transform:translate(-5px,-5px)} 80%{transform:translate(5px,5px)} }
+        .error-shake { animation: shake 0.4s; box-shadow: inset 0 0 80px rgba(255,0,0,0.5) !important; }
+        .success-glow { box-shadow: inset 0 0 80px rgba(0,255,100,0.5) !important; }
+    </style>
+    
+    <!-- Gerekli Kütüphaneler (Firebase KALDIRILDI) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body>
+
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
+
+<!-- Giriş Ekranı -->
+<div id="login-screen">
+    <div class="glass-panel" id="panel">
+        <h2>ÇAĞFEN YAZILIM AĞI</h2>
+        <p>Yerel Çevrimiçi Mod: Own It! 2</p>
+        <input type="text" id="playerName" placeholder="Öğrenci Adı Soyadı" autocomplete="off">
+        <br>
+        <button onclick="startGame()">Sisteme Giriş Yap</button>
+    </div>
+</div>
+
+<!-- Oyun Ekranı -->
+<div id="ui-layer">
+    <div class="top-bar">
+        <div class="stat">SKOR: <span id="score">0</span></div>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div class="stat">SORU: <span id="q-count">1</span>/50</div>
+    </div>
+    
+    <div id="leaderboard">
+        <h3>🏆 YEREL ELİT LİSTE</h3>
+        <ul id="lb-list"><li>Henüz kayıt yok...</li></ul>
+    </div>
+    
+    <div class="question-container">
+        <div id="question-box">Yükleniyor...</div>
+        <div class="answers-hint">
+            <div class="ans-red" id="hint-a">◀ SOL (KIRMIZI)</div>
+            <div class="ans-blue" id="hint-b">SAĞ (MAVİ) ▶</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 1. SES MOTORU
+// ==========================================
+let audioCtx;
+function initAudio() {
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playSound(type) {
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    
+    if (type === 'hover') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.05);
+        gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now); osc.stop(now + 0.05);
+    } else if (type === 'correct') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+    } else if (type === 'wrong') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+    }
+}
+
+// ==========================================
+// 2. 50 BENZERSİZ SORU HAVUZU (RASTGELE KARIŞTIRILIR)
+// ==========================================
+let questions = [
+    { q: "I ____ (hang out) with my friends at the weekend.", a: "hang out", b: "am hanging out", correct: 1 },
+    { q: "Look! She ____ (watch) a documentary right now.", a: "watches", b: "is watching", correct: 2 },
+    { q: "You use ____ to listen to music privately.", a: "headphones", b: "a passport", correct: 1 },
+    { q: "I don't mind ____ (take) photos.", a: "to take", b: "taking", correct: 2 },
+    { q: "They always ____ (read) books before bed.", a: "read", b: "are reading", correct: 1 },
+    { q: "Victor is mad ____ football!", a: "about", b: "for", correct: 1 },
+    { q: "Water ____ (boil) at 100 degrees.", a: "is boiling", b: "boils", correct: 2 },
+    { q: "Are you interested ____ 3D printing?", a: "on", b: "in", correct: 2 },
+    { q: "She ____ (hate) reality shows.", a: "hates", b: "is hating", correct: 1 },
+    { q: "I ____ (wait) for my Yemeksepeti order right now.", a: "am waiting", b: "wait", correct: 1 },
+    { q: "We usually ____ (play) video games after school.", a: "play", b: "are playing", correct: 1 },
+    { q: "Listen! Someone ____ (knock) on the door.", a: "is knocking", b: "knocks", correct: 1 },
+    { q: "He always ____ (wear) a Galatasaray jersey.", a: "wears", b: "wear", correct: 1 },
+    { q: "A show where people play games to win money is a ____.", a: "game show", b: "soap opera", correct: 1 },
+    { q: "Do you ____ (understand) this rule?", a: "understanding", b: "understand", correct: 2 },
+    { q: "I ____ (not know) the answer to this question.", a: "not know", b: "don't know", correct: 2 },
+    { q: "The library ____ (open) at 8:00 AM.", a: "opens", b: "open", correct: 1 },
+    { q: "What ____ you doing?", a: "do", b: "are", correct: 2 },
+    { q: "It ____ (rain) outside. Take your umbrella!", a: "is raining", b: "rains", correct: 1 },
+    { q: "I often ____ (order) İskender kebap for dinner.", a: "order", b: "orders", correct: 1 },
+    { q: "Kamuran ____ (live) in Eskişehir.", a: "lives", b: "live", correct: 1 },
+    { q: "Cats ____ (sleep) a lot during the day.", a: "sleeps", b: "sleep", correct: 2 },
+    { q: "We ____ (build) a new house in Minecraft now.", a: "build", b: "are building", correct: 2 },
+    { q: "They ____ (fly) to Bodrum today.", a: "fly", b: "are flying", correct: 2 },
+    { q: "____ he doing his homework at the moment?", a: "Is", b: "Does", correct: 1 },
+    { q: "She ____ (not wear) her headphones right now.", a: "isn't wearing", b: "doesn't wear", correct: 1 },
+    { q: "I ____ (love) playing video games.", a: "am loving", b: "love", correct: 2 },
+    { q: "He ____ (want) to buy a new gaming mouse.", a: "wants", b: "is wanting", correct: 1 },
+    { q: "They enjoy ____ (watch) sports programmes.", a: "watching", b: "to watch", correct: 1 },
+    { q: "I can't stand ____ (listen) to pop music.", a: "listening", b: "to listen", correct: 1 },
+    { q: "She prefers ____ (read) books to watching TV.", a: "reading", b: "read", correct: 1 },
+    { q: "I ____ (think) this game is awesome.", a: "think", b: "am thinking", correct: 1 },
+    { q: "This soup ____ (smell) delicious.", a: "smells", b: "is smelling", correct: 1 },
+    { q: "I really like ____ (hang out) at the mall.", a: "hanging out", b: "hang out", correct: 1 },
+    { q: "She ____ (believe) in ghosts.", a: "believes", b: "is believing", correct: 1 },
+    { q: "I usually ____ online with my friends on Discord.", a: "chat", b: "take", correct: 1 },
+    { q: "My hobby is ____ photos of nature.", a: "making", b: "taking", correct: 2 },
+    { q: "Let's ____ out at the park this afternoon.", a: "hang", b: "play", correct: 1 },
+    { q: "Do you ____ sports on the weekend?", a: "make", b: "do", correct: 2 },
+    { q: "I want to ____ a new language.", a: "learn", b: "read", correct: 1 },
+    { q: "A programme about real life, animals, or history is a ____.", a: "documentary", b: "comedy", correct: 1 },
+    { q: "I watch the ____ every evening to see what is happening.", a: "news", b: "sitcom", correct: 1 },
+    { q: "A programme that tells you if it will rain is the ____.", a: "weather forecast", b: "reality show", correct: 1 },
+    { q: "A dramatic TV series about daily lives is a ____.", a: "soap opera", b: "documentary", correct: 1 },
+    { q: "A show where normal people live together and are filmed.", a: "reality show", b: "cartoon", correct: 1 },
+    { q: "A funny TV series with the same characters is a ____.", a: "sitcom", b: "news", correct: 1 },
+    { q: "A show where a presenter interviews famous people.", a: "talk show", b: "game show", correct: 1 },
+    { q: "Survivor is a famous ____.", a: "reality show", b: "news", correct: 1 },
+    { q: "We ____ (have) English classes on Mondays.", a: "has", b: "have", correct: 2 },
+    { q: "____ they usually chat online?", a: "Are", b: "Do", correct: 2 }
+];
+
+for (let i = questions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+}
+
+let currentQuestion = 0;
+let score = 0;
+let playerName = "";
+
+// ==========================================
+// 3. THREE.JS MODERN 3D SAHNE
+// ==========================================
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050510, 0.04);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 15, 5); 
+camera.lookAt(0, 0, -5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+const pointRed = new THREE.PointLight(0xff003c, 2, 20); pointRed.position.set(-4, 2, -4); scene.add(pointRed);
+const pointBlue = new THREE.PointLight(0x00f3ff, 2, 20); pointBlue.position.set(4, 2, -4); scene.add(pointBlue);
+
+const gridHelper = new THREE.GridHelper(40, 40, 0x00f3ff, 0x002244);
+gridHelper.position.y = -1; scene.add(gridHelper);
+
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(800 * 3);
+for(let i=0; i < 2400; i++) pPos[i] = (Math.random() - 0.5) * 30;
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({ size: 0.08, color: 0xffffff, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+const particleMesh = new THREE.Points(pGeo, pMat);
+scene.add(particleMesh);
+
+function createCapsule(colorHex, posX) {
+    const group = new THREE.Group(); group.position.set(posX, 1.5, -6);
+    const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.8, 2), new THREE.MeshStandardMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.8, wireframe: true }));
+    group.add(core);
+    const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.5 });
+    const r1 = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.02, 16, 100), ringMat); r1.rotation.x = Math.PI/2; group.add(r1);
+    const r2 = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.02, 16, 100), ringMat); r2.rotation.y = Math.PI/2; group.add(r2);
+    return { group, core, r1, r2 };
+}
+
+const objA = createCapsule(0xff003c, -3.5); scene.add(objA.group);
+const objB = createCapsule(0x00f3ff, 3.5); scene.add(objB.group);
+
+const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+const hitA = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), hitMat); hitA.position.copy(objA.group.position); hitA.name = "A"; scene.add(hitA);
+const hitB = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), hitMat); hitB.position.copy(objB.group.position); hitB.name = "B"; scene.add(hitB);
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hoveredObj = null;
+
+// ==========================================
+// 4. OYUN DÖNGÜSÜ (SPAM KORUMALI)
+// ==========================================
+function startGame() {
+    const input = document.getElementById("playerName").value;
+    if(!input.trim()) return alert("Adınızı giriniz!");
+    playerName = input.trim();
+    initAudio(); playSound('correct'); 
+    
+    document.getElementById("login-screen").style.opacity = "0";
+    setTimeout(() => { 
+        document.getElementById("login-screen").style.display = "none"; 
+        const ui = document.getElementById("ui-layer"); ui.style.display = "block"; setTimeout(()=> ui.style.opacity = "1", 100);
+    }, 1000);
+    
+    new TWEEN.Tween(camera.position).to({ x: 0, y: 1.5, z: 2 }, 2500).easing(TWEEN.Easing.Cubic.Out).start();
+    renderLeaderboard();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    if(currentQuestion >= questions.length) {
+        document.getElementById("question-box").innerHTML = "SİMÜLASYON TAMAMLANDI<br>Tüm soruları bitirdiniz.";
+        document.querySelector('.answers-hint').style.display = 'none';
+        saveScore(); return;
+    }
+    const q = questions[currentQuestion];
+    document.getElementById("question-box").innerHTML = q.q;
+    document.getElementById("hint-a").innerText = `◀ KIRMIZI: ${q.a}`;
+    document.getElementById("hint-b").innerText = `MAVİ: ${q.b} ▶`;
+    document.getElementById("q-count").innerText = currentQuestion + 1;
+    document.getElementById("progress-bar").style.width = ((currentQuestion) / questions.length) * 100 + "%";
+}
+
+window.addEventListener('mousemove', (e) => {
+    if(document.getElementById("login-screen").style.display !== "none") return;
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    
+    document.querySelector('.question-container').style.transform = `translateX(-50%) translate(${mouse.x * 15}px, ${-mouse.y * 15}px)`;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects([hitA, hitB]);
+    
+    if (intersects.length > 0) {
+        document.body.style.cursor = 'crosshair';
+        const target = intersects[0].object.name === "A" ? objA : objB;
+        if(hoveredObj !== target) { hoveredObj = target; playSound('hover'); }
+        target.core.scale.set(1.3, 1.3, 1.3);
+    } else {
+        document.body.style.cursor = 'default';
+        objA.core.scale.set(1, 1, 1); objB.core.scale.set(1, 1, 1);
+        hoveredObj = null;
+    }
+});
+
+let isProcessingClick = false;
+
+window.addEventListener('click', () => {
+    if(!hoveredObj || currentQuestion >= questions.length || isProcessingClick) return;
+    
+    isProcessingClick = true; 
+    
+    const choice = hoveredObj === objA ? 1 : 2;
+    const isCorrect = choice === questions[currentQuestion].correct;
+    
+    hoveredObj.core.scale.set(0.5, 0.5, 0.5); 
+    
+    if(isCorrect) {
+        playSound('correct'); 
+        score += 10; 
+        document.getElementById("score").innerText = score;
+        document.body.classList.add('success-glow'); 
+        setTimeout(() => document.body.classList.remove('success-glow'), 400);
+    } else {
+        playSound('wrong');
+        document.body.classList.add('error-shake'); 
+        setTimeout(() => document.body.classList.remove('error-shake'), 400);
+    }
+    
+    setTimeout(() => {
+        currentQuestion++; 
+        loadQuestion();
+        isProcessingClick = false; 
+    }, 800);
+});
+
+// ==========================================
+// 5. YEREL LİDERLİK TABLOSU (LOCALSTORAGE)
+// ==========================================
+function saveScore() {
+    let scores = JSON.parse(localStorage.getItem("cagfencraft_scores") || "[]");
+    scores.push({name: playerName, score: score});
+    scores.sort((a,b) => b.score - a.score);
+    scores = scores.slice(0, 6); // Sadece ilk 6 kişiyi tut
+    localStorage.setItem("cagfencraft_scores", JSON.stringify(scores));
+    renderLeaderboard();
+}
+
+function renderLeaderboard() {
+    const list = document.getElementById("lb-list");
+    let scores = JSON.parse(localStorage.getItem("cagfencraft_scores") || "[]");
+    
+    if(scores.length === 0) {
+        list.innerHTML = "<li>Henüz kayıt yok...</li>";
+        return;
+    }
+    
+    list.innerHTML = "";
+    scores.forEach((e, i) => { 
+        list.innerHTML += `<li><span>${i+1}. ${e.name}</span> <span>${e.score} P</span></li>`; 
+    });
+}
+
+// Render Döngüsü
+const clock = new THREE.Clock();
+function animate(time) {
+    requestAnimationFrame(animate); TWEEN.update(time);
+    const elapsed = clock.getElapsedTime();
+    particleMesh.rotation.y = elapsed * 0.05;
+    
+    objA.core.rotation.y += 0.01; objA.core.rotation.x += 0.01;
+    objA.r1.rotation.x += 0.02; objA.r2.rotation.y -= 0.02;
+    objA.group.position.y = 1.5 + Math.sin(elapsed * 2) * 0.2;
+
+    objB.core.rotation.y -= 0.01; objB.core.rotation.x -= 0.01;
+    objB.r1.rotation.x -= 0.02; objB.r2.rotation.y += 0.02;
+    objB.group.position.y = 1.5 + Math.cos(elapsed * 2) * 0.2;
+    renderer.render(scene, camera);
+}
+animate();
+window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+</script>
+</body>
+</html>
